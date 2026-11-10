@@ -71,11 +71,12 @@ class PVEConfig(BaseModel):
         user_str = os.getenv("PVE_USER", "root@pam")
         token_name = os.getenv("PVE_TOKEN_NAME", None)
 
-        # Support user@realm!token format directly in PVE_USER
-        if "!" in user_str and not token_name:
+        # Support user@realm!token format directly in PVE_USER (strip token if already present)
+        if "!" in user_str:
             user_part, token_part = user_str.split("!", 1)
             user_str = user_part
-            token_name = token_part
+            if not token_name:
+                token_name = token_part
 
         return cls(
             host=os.getenv("PVE_HOST", "127.0.0.1"),

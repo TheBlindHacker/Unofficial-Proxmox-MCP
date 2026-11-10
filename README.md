@@ -77,7 +77,7 @@ AI models cannot accidentally wipe your fleet:
 - **Immune Blacklist (`PVE_PROTECTED_VMIDS`)**: Nodes listed here (e.g. your router, primary storage, domain controllers) can never be destroyed via MCP.
 
 ### 3. Dedicated Least-Privilege Account Creation
-The installer provides an interactive wizard to create an isolated service account (`mcp-bot@pve`) with a scoped role (`PVEMCP`) instead of using `root@pam`.
+The installer provides an interactive wizard to create an isolated service account (`mcp-bot@pve`) with a scoped role (`MCPAgent`) instead of using `root@pam`.
 
 ---
 

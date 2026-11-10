@@ -76,3 +76,34 @@
 - [x] Dockerfile & Docker Compose validated.
 - [x] Install scripts for Linux/macOS (`install.sh`), Windows (`install.ps1`), and Proxmox Host (`pve-lxc-deploy.sh`).
 - [x] Ready for GitHub repository creation and initial push.
+
+---
+
+## 🔁 OODA Loop Cycle 2 (Live Dogfooding & Cluster Field Verification)
+
+**Date**: 2026-11-10  
+**Target Cluster**: NextGenPVE Hypervisor (`pve-manager/9.2.21`, Linux kernel `7.0.14-25-pve`)
+
+### 1. Observe (Live Cluster Dogfooding)
+- Deployed real Proxmox VE API token (`mcp-bot@pve!mcp-token`) and executed direct tool invocations against live cluster.
+- **Anomalies Detected**:
+  1. *Token Splitting Double-Append*: When `PVE_USER=user@realm!token` and `PVE_TOKEN_NAME=token` were both supplied, `config.py` did not strip the token name from `PVE_USER`, resulting in `user@realm!token!token` and HTTP 401 Unauthorized from `proxmoxer`.
+  2. *Proxmox Role Naming & ACL Syntax*: Proxmox 8/9 strictly rejects custom role names starting with `PVE` (`400 Parameter verification failed. roleid: cannot use role ID starting with the (case-insensitive) 'PVE' namespace`), and requires `--users` / `--roles` with comma-separated privileges. `PVEMCP` failed creation.
+  3. *Unresolved Default Node Lookup*: When `PVE_NODE` is unconfigured or differs from the cluster's actual node name (`bluestar` vs `pve`), calls to `get_node_status`, `list_storage_pools`, and `list_backups` failed with `500 hostname lookup failed`.
+
+### 2. Orient (Root Cause & Risk Analysis)
+- **Token Handling**: User configurations often provide the complete Proxmox token user identifier (`user@realm!tokenid`). The config parser must defensively strip any trailing token ID from `user_str` before passing to ProxmoxAPI.
+- **Role Identifier Standards**: The standard role identifier must be renamed to `MCPAgent` and use valid comma-separated privileges.
+- **Dynamic Node Resolution**: A production MCP client must never crash when `PVE_NODE` is omitted or mismatched. It should auto-discover online cluster nodes from `list_nodes()`.
+
+### 3. Decide
+1. Update `config.py` to always split and sanitize `PVE_USER` if `!` is present.
+2. Add `resolve_node(node)` in `client.py` with online node caching and fallback.
+3. Update `pve-lxc-deploy.sh`, `install.sh`, and `install.ps1` to use role `MCPAgent`, comma-separated `--privs`, and `--users`/`--roles`.
+4. Add unit test `test_token_parsing_strips_user_part` to `tests/test_config.py`.
+
+### 4. Act & Verification
+- **Code Fixed**: `config.py`, `client.py`, `pve-lxc-deploy.sh`, `install.sh`, `install.ps1`, `tests/test_config.py`, and `README.md`.
+- **Live Tool Run**: Executed 8 live cluster operations against `bluestar` (1 node, 6 storage pools, 21 systems): 100% success.
+- **Test Suite**: 25/25 passing in 2.99s. Ruff linting: 100% clean.
+- **Antigravity Integration**: Registered `proxmox` in `C:\Users\brink\.gemini\antigravity\mcp_config.json`.

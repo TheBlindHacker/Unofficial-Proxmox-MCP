@@ -38,18 +38,18 @@ create_dedicated_pve_user() {
 
     if [[ "$CREATE_USER" =~ ^[Yy]$ ]]; then
         if [ "$IS_PVE_HOST" = true ]; then
-            ROLE_NAME="PVEMCP"
+            ROLE_NAME="MCPAgent"
             BOT_USER="mcp-bot@pve"
             TOKEN_ID="mcp-token"
 
             echo -e "${BLUE}[+] Creating scoped PVE Role '${ROLE_NAME}'...${NC}"
-            pveum role add "${ROLE_NAME}" -privs "VM.Audit VM.Console VM.PowerMgmt VM.Config.CPU VM.Config.Memory VM.Config.Disk VM.Config.Network VM.Config.Options VM.Snapshot VM.Snapshot.Rollback VM.Clone VM.Allocate Datastore.Audit Datastore.AllocateSpace Sys.Audit SDN.Audit" 2>/dev/null || true
+            pveum role add "${ROLE_NAME}" --privs "VM.Audit,VM.Console,VM.PowerMgmt,VM.Config.CPU,VM.Config.Memory,VM.Config.Disk,VM.Config.Network,VM.Config.Options,VM.Snapshot,VM.Snapshot.Rollback,VM.Clone,VM.Allocate,Datastore.Audit,Datastore.AllocateSpace,Sys.Audit,SDN.Audit" 2>/dev/null || true
 
             echo -e "${BLUE}[+] Creating PVE User '${BOT_USER}'...${NC}"
             pveum user add "${BOT_USER}" -comment "Dedicated AI Assistant MCP Service Account" 2>/dev/null || true
 
             echo -e "${BLUE}[+] Assigning ACL permissions (/ -> ${ROLE_NAME})...${NC}"
-            pveum acl modify / -user "${BOT_USER}" -role "${ROLE_NAME}"
+            pveum acl modify / --users "${BOT_USER}" --roles "${ROLE_NAME}"
 
             echo -e "${BLUE}[+] Generating API Token '${BOT_USER}!${TOKEN_ID}'...${NC}"
             # Extract token secret
@@ -77,9 +77,9 @@ create_dedicated_pve_user() {
         else
             echo -e "${YELLOW}To create a dedicated user on your Proxmox host, run these commands in the Proxmox Shell:${NC}"
             echo -e "------------------------------------------------------------"
-            echo "pveum role add PVEMCP -privs 'VM.Audit VM.Console VM.PowerMgmt VM.Config.CPU VM.Config.Memory VM.Config.Disk VM.Config.Network VM.Config.Options VM.Snapshot VM.Snapshot.Rollback VM.Clone VM.Allocate Datastore.Audit Datastore.AllocateSpace Sys.Audit SDN.Audit'"
+            echo "pveum role add MCPAgent --privs 'VM.Audit,VM.Console,VM.PowerMgmt,VM.Config.CPU,VM.Config.Memory,VM.Config.Disk,VM.Config.Network,VM.Config.Options,VM.Snapshot,VM.Snapshot.Rollback,VM.Clone,VM.Allocate,Datastore.Audit,Datastore.AllocateSpace,Sys.Audit,SDN.Audit'"
             echo "pveum user add mcp-bot@pve -comment 'AI MCP Service Account'"
-            echo "pveum acl modify / -user mcp-bot@pve -role PVEMCP"
+            echo "pveum acl modify / --users mcp-bot@pve --roles MCPAgent"
             echo "pveum user token add mcp-bot@pve mcp-token -privsep 0"
             echo -e "------------------------------------------------------------"
             read -rp "Proxmox API User [mcp-bot@pve!mcp-token]: " PVE_USER

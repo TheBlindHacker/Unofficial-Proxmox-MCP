@@ -3,12 +3,25 @@
 from unofficial_proxmox_mcp.config import PVEConfig
 
 
-def test_default_config():
+def test_default_config(monkeypatch):
+    monkeypatch.delenv("PVE_NODE", raising=False)
+    monkeypatch.delenv("PVE_PORT", raising=False)
+    monkeypatch.delenv("PVE_VERIFY_SSL", raising=False)
     cfg = PVEConfig()
     assert cfg.port == 8006
     assert cfg.default_node == "pve"
     assert cfg.verify_ssl is False
     assert cfg.protected_vmids == []
+
+
+def test_token_parsing_strips_user_part(monkeypatch):
+    monkeypatch.setenv("PVE_USER", "mcp-bot@pve!mcp-token")
+    monkeypatch.setenv("PVE_TOKEN_NAME", "mcp-token")
+    monkeypatch.setenv("PVE_TOKEN_SECRET", "11111111-2222-3333-4444-555555555555")
+    cfg = PVEConfig.load()
+    assert cfg.user == "mcp-bot@pve"
+    assert cfg.token_name == "mcp-token"
+    assert cfg.auth_summary() == "API Token (mcp-bot@pve!mcp-token)"
 
 
 def test_protected_vmids_parsing(monkeypatch):

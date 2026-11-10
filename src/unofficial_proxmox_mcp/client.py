@@ -16,12 +16,38 @@ class PVEClient:
 
     def __init__(self, config: Optional[PVEConfig] = None) -> None:
         self.config = config or PVEConfig.load()
+        self._cached_node: Optional[str] = None
         if not self.config.verify_ssl:
             # Suppress InsecureRequestWarning to protect MCP stdio JSON-RPC streams
             urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
             warnings.filterwarnings("ignore", category=urllib3.exceptions.InsecureRequestWarning)
 
         self._api = self._init_api()
+
+    def resolve_node(self, node: Optional[str] = None) -> str:
+        """
+        Resolve target node name. If node is provided, returns it.
+        Otherwise, validates self.config.default_node against cluster nodes,
+        auto-discovering the first online node if default_node is invalid or unset.
+        """
+        if node:
+            return node
+        if self._cached_node:
+            return self._cached_node
+
+        try:
+            nodes = self.list_nodes()
+            online_nodes = [n["node"] for n in nodes if n.get("status") == "online"]
+            if self.config.default_node and self.config.default_node in online_nodes:
+                self._cached_node = self.config.default_node
+                return self._cached_node
+            if online_nodes:
+                self._cached_node = online_nodes[0]
+                return self._cached_node
+        except Exception:
+            pass
+
+        return self.config.default_node or "pve"
 
     def _init_api(self) -> ProxmoxAPI:
         """Initialize Proxmoxer API client with token or password authentication."""
@@ -109,7 +135,7 @@ class PVEClient:
 
     def get_node_status(self, node: Optional[str] = None) -> Dict[str, Any]:
         """Fetch deep hardware, kernel, PVE version, and memory telemetry for a node."""
-        target_node = node or self.config.default_node
+        target_node = self.resolve_node(node)
         status_data = self._api.nodes(target_node).status.get()
         version_data = self._api.version.get()
         return {
@@ -137,7 +163,7 @@ class PVEClient:
 
     def list_storage_pools(self, node: Optional[str] = None) -> List[Dict[str, Any]]:
         """List all cluster or node storage pools (ZFS, LVM, Directory, NFS) and capabilities."""
-        target_node = node or self.config.default_node
+        target_node = self.resolve_node(node)
         raw_storage = self._api.nodes(target_node).storage.get()
         storage_list: List[Dict[str, Any]] = []
         for s in raw_storage:
@@ -509,7 +535,7 @@ class PVEClient:
 
     def list_backups(self, storage: str = "local", node: Optional[str] = None) -> List[Dict[str, Any]]:
         """List backup archive files stored in a designated storage pool."""
-        target_node = node or self.config.default_node
+        target_node = self.resolve_node(node)
         raw_content = self._api.nodes(target_node).storage(storage).content.get(content="backup")
         backups: List[Dict[str, Any]] = []
         for b in raw_content:
@@ -849,7 +875,7 @@ resource "proxmox_lxc" "lxc_{vmid}" {{
         node: Optional[str] = None
     ) -> Dict[str, Any]:
         """Provision a new LXC container from an OS template tarball."""
-        target_node = node or self.config.default_node
+        target_node = self.resolve_node(node)
         payload: Dict[str, Any] = {
             "vmid": vmid,
             "hostname": hostname,
@@ -888,7 +914,7 @@ resource "proxmox_lxc" "lxc_{vmid}" {{
         node: Optional[str] = None
     ) -> Dict[str, Any]:
         """Provision a new QEMU virtual machine."""
-        target_node = node or self.config.default_node
+        target_node = self.resolve_node(node)
         payload: Dict[str, Any] = {
             "vmid": vmid,
             "name": name,

@@ -26,9 +26,9 @@ if (-not (Test-Path $EnvFile)) {
 
     Write-Host "`n[Security Recommendation]" -ForegroundColor Yellow
     Write-Host "To create a dedicated, least-privilege user on Proxmox, run in PVE shell:" -ForegroundColor Gray
-    Write-Host "  pveum role add PVEMCP -privs 'VM.Audit VM.Console VM.PowerMgmt VM.Config.CPU VM.Config.Memory VM.Config.Disk VM.Config.Network VM.Config.Options VM.Snapshot VM.Snapshot.Rollback VM.Clone VM.Allocate Datastore.Audit Datastore.AllocateSpace Sys.Audit SDN.Audit'" -ForegroundColor DarkGray
+    Write-Host "  pveum role add MCPAgent --privs 'VM.Audit,VM.Console,VM.PowerMgmt,VM.Config.CPU,VM.Config.Memory,VM.Config.Disk,VM.Config.Network,VM.Config.Options,VM.Snapshot,VM.Snapshot.Rollback,VM.Clone,VM.Allocate,Datastore.Audit,Datastore.AllocateSpace,Sys.Audit,SDN.Audit'" -ForegroundColor DarkGray
     Write-Host "  pveum user add mcp-bot@pve -comment 'Dedicated AI Assistant User'" -ForegroundColor DarkGray
-    Write-Host "  pveum acl modify / -user mcp-bot@pve -role PVEMCP" -ForegroundColor DarkGray
+    Write-Host "  pveum acl modify / --users mcp-bot@pve --roles MCPAgent" -ForegroundColor DarkGray
     Write-Host "  pveum user token add mcp-bot@pve mcp-token -privsep 0`n" -ForegroundColor DarkGray
 
     $User = Read-Host "Proxmox API User [mcp-bot@pve!mcp-token]"

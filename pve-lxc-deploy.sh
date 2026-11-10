@@ -28,12 +28,12 @@ read -rp "Create dedicated Proxmox user 'mcp-bot@pve' with scoped role? (y/n) [y
 CREATE_USER=${CREATE_USER:-y}
 
 if [[ "$CREATE_USER" =~ ^[Yy]$ ]]; then
-    echo "[+] Creating scoped role 'PVEMCP'..."
-    pveum role add PVEMCP -privs "VM.Audit VM.Console VM.PowerMgmt VM.Config.CPU VM.Config.Memory VM.Config.Disk VM.Config.Network VM.Config.Options VM.Snapshot VM.Snapshot.Rollback VM.Clone VM.Allocate Datastore.Audit Datastore.AllocateSpace Sys.Audit SDN.Audit" 2>/dev/null || true
+    echo "[+] Creating scoped role 'MCPAgent'..."
+    pveum role add MCPAgent --privs "VM.Audit,VM.Console,VM.PowerMgmt,VM.Config.CPU,VM.Config.Memory,VM.Config.Disk,VM.Config.Network,VM.Config.Options,VM.Snapshot,VM.Snapshot.Rollback,VM.Clone,VM.Allocate,Datastore.Audit,Datastore.AllocateSpace,Sys.Audit,SDN.Audit" 2>/dev/null || true
 
     echo "[+] Creating user 'mcp-bot@pve'..."
     pveum user add mcp-bot@pve -comment "Dedicated AI Assistant MCP User" 2>/dev/null || true
-    pveum acl modify / -user mcp-bot@pve -role PVEMCP
+    pveum acl modify / --users mcp-bot@pve --roles MCPAgent
 
     echo "[+] Generating API token 'mcp-bot@pve!mcp-token'..."
     TOKEN_SECRET=$(pveum user token add mcp-bot@pve mcp-token -privsep 0 2>&1 | grep -oP '[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}' || true)
