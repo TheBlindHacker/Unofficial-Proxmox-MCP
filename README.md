@@ -1,10 +1,7 @@
 # Unofficial-Proxmox-MCP 🚀
 ### Production-Grade, Drop-In Model Context Protocol (MCP) Server for Proxmox VE
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Python: 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/)
-[![MCP Spec](https://img.shields.io/badge/MCP-1.0+-green.svg)](https://modelcontextprotocol.io/)
-[![Code Style: Ruff](https://img.shields.io/badge/code%20style-ruff-000000.svg)](https://github.com/astral-sh/ruff)
+**License**: MIT | **Python**: 3.10+ | **Protocol**: MCP 1.0+ | **Linter**: Ruff Clean
 
 **Unofficial-Proxmox-MCP** bridges AI assistants (Antigravity, Claude Desktop, Cursor, Hermes Agent, Open-WebUI, LibreChat) directly with your Proxmox Virtual Environment (PVE) cluster via the official Model Context Protocol.
 
@@ -141,7 +138,7 @@ cd Unofficial-Proxmox-MCP
 ### Proxmox VE Host Turnkey LXC:
 Run directly on your Proxmox hypervisor shell:
 ```bash
-curl -fsSL https://raw.githubusercontent.com/your-username/Unofficial-Proxmox-MCP/main/pve-lxc-deploy.sh | bash
+bash pve-lxc-deploy.sh
 ```
 
 ---
