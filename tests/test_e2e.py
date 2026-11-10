@@ -18,7 +18,6 @@ from unofficial_proxmox_mcp.server import (
     pve_list_systems,
     pve_get_system,
     pve_get_guest_network,
-    pve_exec_guest_command,
     pve_lifecycle,
     pve_create_snapshot,
     pve_list_snapshots,
@@ -27,12 +26,9 @@ from unofficial_proxmox_mcp.server import (
     pve_edit_system,
     pve_set_cloudinit,
     pve_resize_disk,
-    pve_clone_system,
     pve_create_lxc,
     pve_create_vm,
     pve_trigger_backup,
-    pve_list_backups,
-    pve_get_firewall,
     pve_set_firewall_rule,
     pve_recommend_placement,
     pve_get_vnc_ticket,
@@ -56,7 +52,7 @@ def e2e_harness():
         self_vmid=299,
     )
 
-    with patch("unofficial_proxmox_mcp.client.ProxmoxAPI") as mock_api_cls, \
+    with patch("unofficial_proxmox_mcp.client.ProxmoxAPI"), \
          patch("unofficial_proxmox_mcp.server.get_client") as mock_server_get:
 
         client = PVEClient(cfg)

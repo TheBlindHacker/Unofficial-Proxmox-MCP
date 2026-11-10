@@ -9,7 +9,7 @@ import sys
 import os
 from .config import PVEConfig
 from .client import PVEClient
-from .server import mcp, get_client
+from .server import mcp
 from . import __version__
 
 

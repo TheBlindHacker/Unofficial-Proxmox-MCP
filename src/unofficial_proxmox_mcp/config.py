@@ -5,9 +5,8 @@ Reads from environment variables, optional .env files, and self-container detect
 
 from __future__ import annotations
 import os
-import sys
 from pathlib import Path
-from typing import List, Optional, Tuple
+from typing import List, Optional
 from pydantic import BaseModel, Field
 from dotenv import load_dotenv
 

@@ -1,8 +1,6 @@
 """Tests for PVEConfig settings, self-protection, and token parsing."""
 
-import os
-import pytest
-from unofficial_proxmox_mcp.config import PVEConfig, detect_self_vmid
+from unofficial_proxmox_mcp.config import PVEConfig
 
 
 def test_default_config():

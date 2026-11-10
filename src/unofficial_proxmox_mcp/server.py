@@ -4,10 +4,9 @@ Compatible with Antigravity, Claude Desktop, Cursor, Hermes Agent, and any MCP c
 """
 
 import json
-from typing import Any, Dict, List, Optional
+from typing import Optional
 from mcp.server.fastmcp import FastMCP
 from .client import PVEClient
-from .config import PVEConfig
 
 # Initialize FastMCP Server
 mcp = FastMCP("unofficial-proxmox-mcp")
